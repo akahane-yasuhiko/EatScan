@@ -10,6 +10,8 @@ function App() {
   const [parsed, setParsed] = useState({});
   const [history, setHistory] = useState(getHistory());
   const aggregated = aggregateByDate(history);
+  const [barcode, setBarcode] = useState('');
+
 
   const handleImageSelected = async (base64Image) => {
     setOcrText('読み取り中...');
@@ -22,9 +24,11 @@ function App() {
 
   const handleSave = () => {
     const timestamp = new Date().toISOString();
-    saveToHistory({ timestamp, parsed });
-    setHistory(getHistory()); // 更新
+    saveToHistory({ timestamp, parsed, barcode });
+    setHistory(getHistory());
+    setBarcode(''); // 入力欄リセット
   };
+
 
   const handleClear = () => {
     clearHistory();
@@ -49,6 +53,17 @@ function App() {
               <li key={key}>{key}: {val}</li>
             ))}
           </ul>
+
+          <div>
+            <label>バーコード（任意）：</label>
+            <input
+              type="text"
+              value={barcode}
+              onChange={(e) => setBarcode(e.target.value)}
+              placeholder="例: 4901234567890"
+            />
+          </div>
+
           <button onClick={handleSave}>この結果を保存</button>
         </div>
       )}
@@ -60,6 +75,7 @@ function App() {
             {history.map((entry, index) => (
               <li key={index}>
                 <strong>{new Date(entry.timestamp).toLocaleString()}:</strong>
+                {entry.barcode && <div>バーコード: {entry.barcode}</div>}
                 <ul>
                   {Object.entries(entry.parsed).map(([key, val]) => (
                     <li key={key}>{key}: {val}</li>
@@ -89,6 +105,8 @@ function App() {
           </ul>
         </div>
       )}
+
+
 
     </div>
   );
