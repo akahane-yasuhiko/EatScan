@@ -3,11 +3,13 @@ import ImageUploader from './components/ImageUploader';
 import { extractTextFromImage } from './utils/visionApi';
 import { parseNutritionText } from './utils/parseNutrition';
 import { saveToHistory, getHistory, clearHistory } from './utils/storage';
+import { aggregateByDate } from './utils/aggregate';
 
 function App() {
   const [ocrText, setOcrText] = useState('');
   const [parsed, setParsed] = useState({});
   const [history, setHistory] = useState(getHistory());
+  const aggregated = aggregateByDate(history);
 
   const handleImageSelected = async (base64Image) => {
     setOcrText('読み取り中...');
@@ -67,6 +69,24 @@ function App() {
             ))}
           </ul>
           <button onClick={handleClear}>履歴をすべて削除</button>
+        </div>
+      )}
+
+      {Object.keys(aggregated).length > 0 && (
+        <div style={{ marginTop: '2em' }}>
+          <h2>日別の栄養素合計</h2>
+          <ul>
+            {Object.entries(aggregated).map(([date, nutrients]) => (
+              <li key={date}>
+                <strong>{date}:</strong>
+                <ul>
+                  {Object.entries(nutrients).map(([key, val]) => (
+                    <li key={key}>{key}: {val.toFixed(1)}</li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
