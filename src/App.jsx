@@ -6,6 +6,7 @@ import { saveToHistory, getHistory, clearHistory } from './utils/storage';
 import { aggregateByDate } from './utils/aggregate';
 import { readBarcodeFromImage } from './utils/barcodeFromImage';
 import { normalizeNutritionText } from './utils/normalizeText';
+import ImageCropper from './components/ImageCropper';
 
 function App() {
   const [rawText, setRawText] = useState('');
@@ -14,6 +15,7 @@ function App() {
   const [history, setHistory] = useState(getHistory());
   const aggregated = aggregateByDate(history);
   const [barcode, setBarcode] = useState('');
+  const [uploadedBase64, setUploadedBase64] = useState(null);
 
   const handleImageSelected = async (base64Image) => {
     setRawText('読み取り中...');
@@ -54,7 +56,27 @@ function App() {
       <h1>EatScan</h1>
       <p>食品ラベルを撮影して成分を読み取ります。</p>
 
-      <ImageUploader onImageSelected={handleImageSelected} />
+      {/* <ImageUploader onImageSelected={handleImageSelected} /> */}
+      <ImageUploader
+        onImageSelected={(base64Image) => {
+          setUploadedBase64(base64Image);
+          // OCR はここでは実行しない → 切り抜き後に実行する
+        }}
+      />
+
+      {uploadedBase64 && (
+        <ImageCropper
+          imageSrc={uploadedBase64}
+          onCrop={async (croppedBase64) => {
+            const text = await extractTextFromImage(croppedBase64);
+            const normalized = normalizeNutritionText(text);
+            setOcrText(normalized);
+            setParsed(parseNutritionText(normalized));
+          }}
+        />
+      )}
+
+
 
       <h2>OCR結果</h2>
       <pre style={{ whiteSpace: 'pre-wrap' }}>{rawText}</pre>
