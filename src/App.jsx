@@ -4,22 +4,36 @@ import { extractTextFromImage } from './utils/visionApi';
 import { parseNutritionText } from './utils/parseNutrition';
 import { saveToHistory, getHistory, clearHistory } from './utils/storage';
 import { aggregateByDate } from './utils/aggregate';
+import { readBarcodeFromImage } from './utils/barcodeFromImage';
+import { normalizeNutritionText } from './utils/normalizeText';
 
 function App() {
+  const [rawText, setRawText] = useState('');
   const [ocrText, setOcrText] = useState('');
   const [parsed, setParsed] = useState({});
   const [history, setHistory] = useState(getHistory());
   const aggregated = aggregateByDate(history);
   const [barcode, setBarcode] = useState('');
 
-
   const handleImageSelected = async (base64Image) => {
+    setRawText('読み取り中...');
     setOcrText('読み取り中...');
     const rawText = await extractTextFromImage(base64Image);
-    setOcrText(rawText);
+    setRawText(rawText);
 
-    const parsedResult = parseNutritionText(rawText);
+    // 解析結果を整形
+    const normalizedText = normalizeNutritionText(rawText);
+    setOcrText(normalizedText);
+
+    // 画像から成分表を読む
+    const parsedResult = parseNutritionText(normalizedText);
     setParsed(parsedResult);
+
+    // 画像からバーコードを読む
+    const scannedCode = await readBarcodeFromImage(base64Image);
+    if (scannedCode) {
+      setBarcode(scannedCode);
+    }
   };
 
   const handleSave = () => {
@@ -43,6 +57,8 @@ function App() {
       <ImageUploader onImageSelected={handleImageSelected} />
 
       <h2>OCR結果</h2>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>{rawText}</pre>
+      
       <pre style={{ whiteSpace: 'pre-wrap' }}>{ocrText}</pre>
 
       {Object.keys(parsed).length > 0 && (
