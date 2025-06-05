@@ -1,12 +1,5 @@
-# React + Vite
+# 食品成分表示を読み取り記録することで日々の食事の栄養管理を行う
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+食品成分表示読み取りにGoogleのCloud Vision APIを使ったが表形式の記載に対して解析精度の問題があった。
+Geminiであれば精度の問題をクリアできるためGeminiに以降する。
+それに伴い、クライアント側で完結する構成をあきらめて解析処理をサーバー側に持たせることにする。
